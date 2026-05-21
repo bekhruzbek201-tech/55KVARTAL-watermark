@@ -13,7 +13,7 @@ const state = {
     logoLoaded: false,      // Logo loading status flag
     watermarkMode: 'logo',  // 'logo' | 'text' | 'both'
     presetTemplate: 'diagonal-tiled', // 'diagonal-tiled' | 'corner-badge' | 'center-stamp'
-    watermarkText: 'SMTH Real Estate • Exclusive Listing',
+    watermarkText: '55KVARTAL',
     opacity: 0.15,          // Opacity level of watermark layers (0.05 to 0.60)
     logoScale: 0.12,        // Scale of logo relative to photo dimensions
     textSize: 16,           // Text font size in pixels (scales up with high-res photos)
@@ -96,13 +96,13 @@ function loadLogo() {
     
     state.logoImage.onload = () => {
         state.logoLoaded = true;
-        updateLogoIndicatorStatus(true, 'SMTH Logo Loaded', 'logo.png loaded from workspace');
+        updateLogoIndicatorStatus(true, 'Логотип 55KVARTAL загружен', 'logo.png успешно загружен');
         triggerCanvasRender();
     };
     
     state.logoImage.onerror = () => {
         state.logoLoaded = false;
-        updateLogoIndicatorStatus(false, 'Logo Not Found', 'Place logo.png in this folder or upload one.');
+        updateLogoIndicatorStatus(false, 'Логотип не найден', 'Поместите logo.png в эту папку');
         // Fall back to Text Only mode if logo fails to load
         setWatermarkMode('text');
     };
@@ -216,7 +216,7 @@ function handleFilesSelected(filesList) {
    ========================================================================== */
 function updateQueueUI() {
     const queueList = elements.queueList;
-    elements.queueCount.textContent = `${state.imagesQueue.length} Image${state.imagesQueue.length === 1 ? '' : 's'}`;
+    elements.queueCount.textContent = `${state.imagesQueue.length} Изображений`;
     
     // Toggle Clear All Button
     elements.clearQueueBtn.disabled = state.imagesQueue.length === 0;
@@ -228,14 +228,14 @@ function updateQueueUI() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="placeholder-icon">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-3.75 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
-                <p>No images uploaded yet</p>
+                <p>Изображения пока не загружены</p>
             </div>
         `;
         
         // Clear canvas preview
         clearCanvas();
         elements.downloadActiveBtn.disabled = true;
-        elements.activeFilename.textContent = 'No image selected';
+        elements.activeFilename.textContent = 'Изображение не выбрано';
         return;
     }
 
@@ -255,10 +255,10 @@ function updateQueueUI() {
                 <span class="filename" title="${item.name}">${item.name}</span>
                 <span class="file-info">${item.size} • ${item.imgObject.naturalWidth}×${item.imgObject.naturalHeight}</span>
                 <span class="status-badge ${item.processed ? 'done' : 'pending'}">
-                    ${item.processed ? 'Processed ✓' : 'Ready'}
+                    ${item.processed ? 'Готово ✓' : 'Ожидает'}
                 </span>
             </div>
-            <div class="queue-action" title="Remove Photo" onclick="removeQueueItem(event, ${index})">
+            <div class="queue-action" title="Удалить фото" onclick="removeQueueItem(event, ${index})">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="queue-action-icon">
                     <polyline points="3 6 5 6 21 6"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -343,9 +343,9 @@ function setupControlPanelEvents() {
             // Adjust label text
             const notice = document.querySelector('.export-notice');
             if (state.exportFormat === 'image/webp') {
-                notice.textContent = 'WebP matches modern real estate listings perfectly, compressing files by up to 75% with zero visible quality loss.';
+                notice.textContent = 'WebP идеально подходит для современных сайтов, сжимая файлы до 75% без видимой потери качества.';
             } else {
-                notice.textContent = 'JPEG offers excellent general compatibility but larger file sizes compared to WebP format.';
+                notice.textContent = 'JPEG предлагает отличную совместимость, но больший размер файла по сравнению с WebP.';
             }
         });
     });
@@ -410,7 +410,7 @@ function setupButtonEvents() {
         state.imagesQueue = [];
         state.activeIndex = -1;
         updateQueueUI();
-        if (typeof showToast === 'function') showToast('Queue cleared', 'info');
+        if (typeof showToast === 'function') showToast('Очередь очищена', 'info');
     });
 
     elements.downloadActiveBtn.addEventListener('click', () => {
@@ -652,7 +652,7 @@ function downloadActiveImage() {
     
     // Flag queue item status as completed
     activeItem.processed = true;
-    if (typeof showToast === 'function') showToast(`Downloaded ${newFilename}`, 'success');
+    if (typeof showToast === 'function') showToast(`Скачано ${newFilename}`, 'success');
     
     // Auto-advance to next image for blazing fast workflows
     if (state.activeIndex < state.imagesQueue.length - 1) {
@@ -686,7 +686,7 @@ function downloadBatchZip() {
     state.isProcessing = true;
     elements.canvasLoader.style.display = 'flex';
     const loaderText = elements.canvasLoader.querySelector('p');
-    loaderText.textContent = 'Preparing batch processing...';
+    loaderText.textContent = 'Подготовка к обработке...';
     
     // Create an offline processing canvas to avoid visual flickers during batch rendering
     const offlineCanvas = document.createElement('canvas');
@@ -708,7 +708,7 @@ function downloadBatchZip() {
         if (itemIndex >= state.imagesQueue.length) {
             // Done Processing!
             if (hasZipLib) {
-                loaderText.textContent = 'Compiling ZIP package...';
+                loaderText.textContent = 'Создание ZIP архива...';
                 
                 zip.generateAsync({ type: 'blob' }).then(function(content) {
                     const link = document.createElement('a');
@@ -727,7 +727,7 @@ function downloadBatchZip() {
         }
 
         const queueItem = state.imagesQueue[itemIndex];
-        loaderText.textContent = `Watermarking image [${itemIndex + 1}/${state.imagesQueue.length}]: ${queueItem.name}`;
+        loaderText.textContent = `Обработка изображения [${itemIndex + 1}/${state.imagesQueue.length}]: ${queueItem.name}`;
         
         // Render on background canvas
         renderWatermarkedCanvas(offlineCanvas, queueItem.imgObject);
@@ -761,7 +761,7 @@ function downloadBatchZip() {
 function finishBatchProcessing() {
     state.isProcessing = false;
     elements.canvasLoader.style.display = 'none';
-    if (typeof showToast === 'function') showToast(`Successfully processed ${state.imagesQueue.length} images!`, 'success');
+    if (typeof showToast === 'function') showToast(`Успешно обработано ${state.imagesQueue.length} изображений!`, 'success');
     updateQueueUI();
 }
 
