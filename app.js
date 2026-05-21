@@ -49,6 +49,7 @@ const elements = {
     // Action Buttons
     downloadActiveBtn: document.getElementById('download-active-btn'),
     downloadBatchBtn: document.getElementById('download-batch-btn'),
+    downloadFolderBtn: document.getElementById('download-folder-btn'),
     
     // Controls toggles
     tabButtons: document.querySelectorAll('.tab-btn'),
@@ -74,6 +75,13 @@ window.addEventListener('DOMContentLoaded', () => {
 function initApp() {
     // 1. Attempt to load the pre-copied logo from the directory
     loadLogo();
+
+    // Setup API Support toggles
+    if (window.showDirectoryPicker && elements.downloadFolderBtn) {
+        elements.downloadFolderBtn.style.display = 'flex';
+        // Hide ZIP button to keep the UI clean if folder API is supported
+        elements.downloadBatchBtn.style.display = 'none';
+    }
 
     // 2. Setup Event Listeners
     setupDropzoneEvents();
@@ -221,6 +229,9 @@ function updateQueueUI() {
     // Toggle Clear All Button
     elements.clearQueueBtn.disabled = state.imagesQueue.length === 0;
     elements.downloadBatchBtn.disabled = state.imagesQueue.length === 0;
+    if (elements.downloadFolderBtn) {
+        elements.downloadFolderBtn.disabled = state.imagesQueue.length === 0;
+    }
 
     if (state.imagesQueue.length === 0) {
         queueList.innerHTML = `
@@ -420,6 +431,12 @@ function setupButtonEvents() {
     elements.downloadBatchBtn.addEventListener('click', () => {
         downloadBatchZip();
     });
+
+    if (elements.downloadFolderBtn) {
+        elements.downloadFolderBtn.addEventListener('click', () => {
+            downloadBatchToDirectory();
+        });
+    }
 }
 
 /* ==========================================================================
@@ -775,6 +792,65 @@ function formatBytes(bytes, decimals = 1) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+/**
+ * Strategy: Uses modern File System Access API to stream output directly into a local user folder.
+ */
+async function downloadBatchToDirectory() {
+    if (state.imagesQueue.length === 0 || state.isProcessing) return;
+
+    try {
+        // Request directory handle from user
+        const directoryHandle = await window.showDirectoryPicker({
+            mode: 'readwrite',
+            startIn: 'pictures'
+        });
+
+        state.isProcessing = true;
+        elements.canvasLoader.style.display = 'flex';
+        const loaderText = elements.canvasLoader.querySelector('p');
+        
+        const offlineCanvas = document.createElement('canvas');
+        const formatExt = state.exportFormat === 'image/webp' ? 'webp' : 'jpg';
+        const formatMime = state.exportFormat;
+        const quality = state.exportQuality;
+
+        for (let i = 0; i < state.imagesQueue.length; i++) {
+            const queueItem = state.imagesQueue[i];
+            loaderText.textContent = `Сохранение [${i + 1}/${state.imagesQueue.length}]: ${queueItem.name}`;
+            
+            // Render on background canvas
+            renderWatermarkedCanvas(offlineCanvas, queueItem.imgObject);
+            
+            const origName = queueItem.name.substring(0, queueItem.name.lastIndexOf('.')) || queueItem.name;
+            const newFilename = `${origName}_protected.${formatExt}`;
+            
+            // Get blob from canvas using Promise for cleaner async flow
+            const blob = await new Promise(resolve => offlineCanvas.toBlob(resolve, formatMime, quality));
+            
+            // Write to file system
+            const fileHandle = await directoryHandle.getFileHandle(newFilename, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            
+            queueItem.processed = true;
+        }
+
+        finishBatchProcessing();
+        if (typeof showToast === 'function') showToast(`Успешно сохранено в папку!`, 'success');
+        
+    } catch (error) {
+        state.isProcessing = false;
+        elements.canvasLoader.style.display = 'none';
+        
+        // Handle AbortError (user cancelled picker) silently
+        if (error.name !== 'AbortError') {
+            console.error('Directory saving failed:', error);
+            if (typeof showToast === 'function') showToast('Ошибка при сохранении в папку', 'warning');
+        }
+    }
 }
 
 /* ==========================================================================
