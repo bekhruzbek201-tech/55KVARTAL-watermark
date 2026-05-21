@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMTH Image Guardian | Premium Real Estate Watermarking</title>
+    <meta name="description" content="Secure and optimize real estate property photos with premium, non-distracting visual watermarks, client-side metadata injection, and high-performance WebP compression.">
+    <!-- Google Fonts for premium prop-tech aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- JSZip library for premium bulk download in a single click -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 11 2 2 4-4"/>
+                </svg>
+                <div class="brand">
+                    <h1>SMTH <span>Image Guardian</span></h1>
+                    <p class="tagline">Premium Property Photo Protection</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator"></span>
+                <span class="status-text">Client-Side Engine Active (100% Free & Private)</span>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main">
+            <!-- SECTION 1: BATCH & UPLOAD WORKSPACE -->
+            <section class="workspace-section" id="upload-workspace">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <span class="step-badge">1</span>
+                        <h2>Upload & Queue</h2>
+                    </div>
+                    <span class="badge" id="queue-count">0 Images</span>
+                </div>
+
+                <!-- Dropzone -->
+                <div class="dropzone" id="image-dropzone">
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon-container">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="dropzone-icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                        </div>
+                        <h3>Drag & Drop property photos</h3>
+                        <p class="dropzone-sub">or click to browse your computer</p>
+                        <span class="support-info">Supports JPEG, PNG, WebP (Multi-select enabled)</span>
+                    </div>
+                </div>
+                <input type="file" id="file-input" multiple accept="image/*" class="file-input-hidden">
+
+                <!-- Queue Container -->
+                <div class="queue-container">
+                    <div class="queue-toolbar">
+                        <span class="queue-subtitle">BATCH IMAGES</span>
+                        <button id="clear-queue-btn" class="text-btn" disabled>Clear All</button>
+                    </div>
+                    <div class="image-queue" id="queue-list">
+                        <div class="empty-queue-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="placeholder-icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-3.75 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                            <p>No images uploaded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: LIVE EDITOR & CONTROLS -->
+            <section class="workspace-section" id="editor-workspace">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <span class="step-badge">2</span>
+                        <h2>Watermark & Protection Editor</h2>
+                    </div>
+                    <div class="active-image-name" id="active-filename">No image selected</div>
+                </div>
+
+                <div class="editor-layout">
+                    <!-- Main Canvas Preview -->
+                    <div class="preview-panel">
+                        <div class="canvas-wrapper">
+                            <div class="canvas-loading" id="canvas-loader" style="display: none;">
+                                <div class="spinner"></div>
+                                <p>Processing watermark layers...</p>
+                            </div>
+                            <canvas id="editor-canvas"></canvas>
+                            <div class="canvas-placeholder" id="canvas-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" class="big-placeholder-icon">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                                </svg>
+                                <h3>Real-Time Protection Preview</h3>
+                                <p>Upload and select a photo from the queue to apply watermarks</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Controls -->
+                    <div class="controls-panel">
+                        <!-- Logo Auto Load Status -->
+                        <div class="logo-status-box" id="logo-indicator">
+                            <div class="logo-indicator-dot success"></div>
+                            <div class="logo-status-info">
+                                <span class="logo-title">SMTH Logo Loaded</span>
+                                <span class="logo-sub">logo.png loaded from workspace</span>
+                            </div>
+                        </div>
+
+                        <!-- CONTROL: Mode Tab -->
+                        <div class="control-group">
+                            <label class="control-label">WATERMARK MODE</label>
+                            <div class="tab-selector">
+                                <button class="tab-btn active" data-mode="logo">Logo Only</button>
+                                <button class="tab-btn" data-mode="text">Text Only</button>
+                                <button class="tab-btn" data-mode="both">Logo + Text</button>
+                            </div>
+                        </div>
+
+                        <!-- CONTROL: Protection Presets -->
+                        <div class="control-group">
+                            <div class="label-with-tooltip">
+                                <label class="control-label">REAL ESTATE PROTECTION TEMPLATE</label>
+                                <span class="info-tooltip" title="Curated templates designed specifically for real estate. Low-to-moderate opacity levels ensure watermarks do not distract property buyers, while keeping photos safe from theft.">i</span>
+                            </div>
+                            <div class="preset-grid">
+                                <button class="preset-card active" data-preset="diagonal-tiled">
+                                    <span class="preset-name">Subtle Tiled</span>
+                                    <span class="preset-desc">Diagonal repeating pattern. Maximum security.</span>
+                                </button>
+                                <button class="preset-card" data-preset="corner-badge">
+                                    <span class="preset-name">Corner Badge</span>
+                                    <span class="preset-desc">Bottom right brand mark. Premium & clean.</span>
+                                </button>
+                                <button class="preset-card" data-preset="center-stamp">
+                                    <span class="preset-name">Center Stamp</span>
+                                    <span class="preset-desc">Faint center overlay. Zero distractions.</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CONTROL: Dynamic Branding Inputs -->
+                        <div class="control-group dynamic-text-input-group" style="display: none;">
+                            <label class="control-label" for="watermark-text">WATERMARK TEXT</label>
+                            <input type="text" id="watermark-text" class="text-input" value="SMTH Real Estate • Exclusive Listing" placeholder="Enter branding text...">
+                            <span class="input-helper">Dynamic branding text layered across the image.</span>
+                        </div>
+
+                        <!-- CONTROL: Opacity / Sizing -->
+                        <div class="control-group sliders-group">
+                            <div class="slider-row">
+                                <div class="slider-label-group">
+                                    <span class="slider-label">Watermark Opacity</span>
+                                    <span class="slider-val" id="opacity-val">15%</span>
+                                </div>
+                                <input type="range" id="watermark-opacity" min="5" max="60" value="15" class="slider-input">
+                            </div>
+
+                            <div class="slider-row logo-only-control">
+                                <div class="slider-label-group">
+                                    <span class="slider-label">Logo Scale</span>
+                                    <span class="slider-val" id="scale-val">12%</span>
+                                </div>
+                                <input type="range" id="logo-scale" min="5" max="30" value="12" class="slider-input">
+                            </div>
+                            
+                            <div class="slider-row text-only-control" style="display: none;">
+                                <div class="slider-label-group">
+                                    <span class="slider-label">Font Size</span>
+                                    <span class="slider-val" id="font-size-val">16px</span>
+                                </div>
+                                <input type="range" id="text-size" min="12" max="32" value="16" class="slider-input">
+                            </div>
+                        </div>
+
+                        <!-- EXPORT & BATCH ACTIONS -->
+                        <div class="export-section">
+                            <div class="export-header-row">
+                                <span class="control-label">EXPORT CONFIG</span>
+                                <div class="format-toggle">
+                                    <button class="format-btn active" data-format="image/webp">WebP</button>
+                                    <button class="format-btn" data-format="image/jpeg">JPEG</button>
+                                </div>
+                            </div>
+                            <div class="slider-row">
+                                <div class="slider-label-group">
+                                    <span class="slider-sub-label">Image Optimization Quality</span>
+                                    <span class="slider-val" id="quality-val">82%</span>
+                                </div>
+                                <input type="range" id="export-quality" min="50" max="95" value="82" class="slider-input">
+                            </div>
+
+                            <div class="action-buttons-group">
+                                <button class="primary-btn" id="download-active-btn" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    <span>Download Active <span style="opacity: 0.7; font-weight: normal; font-size: 0.9em; margin-left: 4px;">(Ctrl+S)</span></span>
+                                </button>
+                                <button class="secondary-btn" id="download-batch-btn" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                                        <path d="m22 8-6 4 6 4V8Z"/>
+                                        <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                                    </svg>
+                                    <span>Download Batch (ZIP)</span>
+                                </button>
+                            </div>
+                            <p class="export-notice">WebP matches modern real estate listings perfectly, compressing files by up to 75% with zero visible quality loss. Use Arrow Keys to navigate queue.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Load Base64 embedded logo to bypass Canvas Tainting (CORS) security issues on local file:// protocol -->
+    <script src="logo_base64.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
