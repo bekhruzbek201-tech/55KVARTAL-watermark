@@ -7,7 +7,7 @@
 
 // Global Application State
 const state = {
-    imagesQueue: [],        // Array of image objects: { id, file, name, size, imgObject, processed: false }
+    imagesQueue: [],        // Array of image objects: { id, file, name, size, imgObject, processed: false, hasGps: false }
     activeIndex: -1,        // Index of the currently active/selected image
     logoImage: null,        // Global Image object for the pre-copied company logo
     logoLoaded: false,      // Logo loading status flag
@@ -193,23 +193,41 @@ function handleFilesSelected(filesList) {
         reader.onload = (e) => {
             const imgObject = new Image();
             imgObject.onload = () => {
-                state.imagesQueue.push({
-                    id: id,
-                    file: file,
-                    name: file.name,
-                    size: formatBytes(file.size),
-                    imgObject: imgObject,
-                    processed: false
-                });
+                // Parse EXIF data using exif-js
+                let hasGps = false;
+                if (typeof EXIF !== 'undefined') {
+                    EXIF.getData(file, function() {
+                        const lat = EXIF.getTag(this, "GPSLatitude");
+                        const lon = EXIF.getTag(this, "GPSLongitude");
+                        if (lat || lon) {
+                            hasGps = true;
+                        }
+                        finalizeUpload();
+                    });
+                } else {
+                    finalizeUpload();
+                }
+                
+                function finalizeUpload() {
+                    state.imagesQueue.push({
+                        id: id,
+                        file: file,
+                        name: file.name,
+                        size: formatBytes(file.size),
+                        imgObject: imgObject,
+                        processed: false,
+                        hasGps: hasGps
+                    });
 
-                loadedCount++;
-                if (loadedCount === validFiles.length) {
-                    elements.canvasLoader.style.display = 'none';
-                    updateQueueUI();
-                    
-                    // If no active image is selected, auto-select the first newly uploaded image
-                    if (state.activeIndex === -1) {
-                        selectQueueItem(state.imagesQueue.length - validFiles.length);
+                    loadedCount++;
+                    if (loadedCount === validFiles.length) {
+                        elements.canvasLoader.style.display = 'none';
+                        updateQueueUI();
+                        
+                        // If no active image is selected, auto-select the first newly uploaded image
+                        if (state.activeIndex === -1) {
+                            selectQueueItem(state.imagesQueue.length - validFiles.length);
+                        }
                     }
                 }
             };
@@ -265,9 +283,12 @@ function updateQueueUI() {
             <div class="queue-details">
                 <span class="filename" title="${item.name}">${item.name}</span>
                 <span class="file-info">${item.size} • ${item.imgObject.naturalWidth}×${item.imgObject.naturalHeight}</span>
-                <span class="status-badge ${item.processed ? 'done' : 'pending'}">
-                    ${item.processed ? 'Готово ✓' : 'Ожидает'}
-                </span>
+                <div class="badge-row" style="display: flex; gap: 6px; margin-top: 4px;">
+                    <span class="status-badge ${item.processed ? 'done' : 'pending'}">
+                        ${item.processed ? 'Готово ✓' : 'Ожидает'}
+                    </span>
+                    ${item.hasGps ? '<span class="status-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">GPS Найден!</span>' : '<span class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">Без GPS</span>'}
+                </div>
             </div>
             <div class="queue-action" title="Удалить фото" onclick="removeQueueItem(event, ${index})">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="queue-action-icon">

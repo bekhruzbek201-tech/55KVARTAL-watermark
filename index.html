@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="styles.css">
     <!-- JSZip library for premium bulk download in a single click -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" referrerpolicy="no-referrer"></script>
+    <!-- Exif.js library to detect privacy leaks (GPS/Location data) -->
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -185,6 +187,17 @@
 
                         <!-- EXPORT & BATCH ACTIONS -->
                         <div class="export-section">
+                            <div class="privacy-shield-banner" style="display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; color: #10b981;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                                <div>
+                                    <span style="display: block; font-weight: 700; font-size: 0.85rem;">Приватность обеспечена</span>
+                                    <span style="display: block; font-size: 0.75rem; opacity: 0.9;">GPS и скрытые EXIF-данные удаляются автоматически</span>
+                                </div>
+                            </div>
+                            
                             <div class="export-header-row">
                                 <span class="control-label">НАСТРОЙКИ ЭКСПОРТА</span>
                                 <div class="format-toggle">
